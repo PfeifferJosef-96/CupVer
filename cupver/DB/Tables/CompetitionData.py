@@ -1,15 +1,19 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from cupver.DB.DB import Base
 
 
-class Competition(Base):
+class CompetitionData(Base):
 
-    ___tablename__ = "competitions"
+    __tablename__ = "competitions"
 
     id = Column(Integer, primary_key=True)
     town = Column(String)
     date = Column(String)
     nr = Column(Integer)
+    result_id = Column(Integer, ForeignKey("results.id"))
+
+    #results = relationship("Result", back_populates="competition_id")
 

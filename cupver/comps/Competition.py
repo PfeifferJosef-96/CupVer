@@ -1,13 +1,44 @@
+from cupver.DB.DB import DataInterface
+
+
 class Competition(object):
-    def __init__(self, ParticipantImport, Athlete, Location):
+    def __init__(self, ParticipantImport, Athlete, CompetitionData):
 
         self.ParticipantImport = ParticipantImport()
         self.Athlete = Athlete
-        self.Location = Location
+        self.CompetitionData = CompetitionData
+        self.DataInterface = DataInterface()
 
-    def connectToDatabase(self, fpath, newDatabase=True):
+    def getPartResult(self):
+        raise NotImplementedError
 
-        self.CompDatabase.setDatabaseConnection(fpath, newDatabase)
+    def getFinalResult(self):
+        raise NotImplementedError
+
+    def connectToDatabase(self, newSession):
+
+        self.DataInterface.connectToDatabase(newSession)
+
+    def addNewCompetition(self, data):
+        """
+        """
+
+        cData = data["compData"]
+        newComp = self.CompetitionData(**cData)
+        compId = self.DataInterface.addNewTableEntry(newComp)
+
+        resData = data["resultData"]
+        resDataDict = resData.to_dict("records")
+
+        # TODO: Write the results into the database
+
+    def getAllParticipants(self):
+        """
+        """
+
+        queryData = self.DataInterface.queryWholeTable(self.Athlete)
+
+        return queryData
 
     def importParticipantsFromFile(self, session, fpath):
         """Participants are loaded from a defined excel file and written
@@ -26,23 +57,17 @@ class Competition(object):
 
             newPartics = df.to_dict("records")
 
-            for parti in newPartics:
-                convPartiDict = self.convertImportNamesToAthleteKeys(parti)
-
-                newAth = self.Athlete(**convPartiDict)
-                session.add(newAth)
-
         except Exception as exc:
-            # TODO: Split up the exception type!
-            session.rollback()
 
-            print("Error - Check Import")
+            # TODO error handling
+            raise exc
 
-        else:
-            session.commit()
+        for parti in newPartics:
+            convPartiDict = self.convertImportNamesToAthleteKeys(parti)
 
-        finally:
-            session.close()
+            newAth = self.Athlete(**convPartiDict)
+
+            self.DataInterface.addNewTableEntry(newAth)
 
     def convertImportNamesToAthleteKeys(self, importDict):
 
