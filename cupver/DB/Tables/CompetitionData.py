@@ -13,7 +13,6 @@ class CompetitionData(Base):
     town = Column(String)
     date = Column(String)
     nr = Column(Integer)
-    result_id = Column(Integer, ForeignKey("results.id"))
 
     #results = relationship("Result", back_populates="competition_id")
 

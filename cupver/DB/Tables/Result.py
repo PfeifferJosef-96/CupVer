@@ -10,7 +10,9 @@ class Result(Base):
 
     id = Column(Integer, primary_key=True)
     rank = Column(Integer)
-    #competition_id = Column(Integer, ForeignKey("competitions.id"))
+    competition_id = Column(Integer, ForeignKey("competitions.id"))
     athlete_id = Column(Integer, ForeignKey("athletes.id"))
 
     athlete = relationship("Athlete", back_populates="results")
+    #competition = relationship("CompetitionData", back_populates=)
+

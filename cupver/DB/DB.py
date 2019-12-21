@@ -18,7 +18,8 @@ class DataInterface(object):
             session (sql.Session): The session to connect to
         
         Returns:
-            None
+            0 -> no error
+            -1 -> error occured
         """
         ret_val = 0
         try:
@@ -39,14 +40,6 @@ class DataInterface(object):
 
         try:
             self.session.add(tableRow)
-
-        except TypeError as typexc:
-            # TODO Handle error if func arg is missing
-            raise typexc
-
-        except AttributeError as attrexc:
-            # TODO: Handle error if exception occursd
-            raise attrexc
 
         except Exception as exc:
             # TODO: Split up the exception type!
@@ -98,3 +91,9 @@ class DataInterface(object):
 
     def resetWholeDatabase(self):
         pass
+
+    def queryRowByID(self, table, id):
+
+        query = self.session.query(Athlete).filter_by(id=1).first()
+
+        return query

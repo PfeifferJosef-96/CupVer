@@ -13,5 +13,6 @@ class VrCup(Competition):
             ParticipantImport=ParticipantImport,
             Athlete=Athlete,
             CompetitionData=CompetitionData,
+            ResultData=Result,
         )
 

@@ -2,10 +2,11 @@ from cupver.DB.DB import DataInterface
 
 
 class Competition(object):
-    def __init__(self, ParticipantImport, Athlete, CompetitionData):
+    def __init__(self, ParticipantImport, Athlete, ResultData, CompetitionData):
 
         self.ParticipantImport = ParticipantImport()
         self.Athlete = Athlete
+        self.ResultData = ResultData
         self.CompetitionData = CompetitionData
         self.DataInterface = DataInterface()
 
@@ -16,8 +17,23 @@ class Competition(object):
         raise NotImplementedError
 
     def connectToDatabase(self, newSession):
+        """Connect the Competition to a database.
 
-        self.DataInterface.connectToDatabase(newSession)
+        Args:
+            newSession (sqlalchemy.Session): Session with engine
+
+        Returns:
+            status (int):   0 -> success
+                            -1 -> error
+        """
+
+        status = self.DataInterface.connectToDatabase(newSession)
+
+        return status
+    
+    def getAthleteByID(self, id):
+
+        pass
 
     def addNewCompetition(self, data):
         """
@@ -28,9 +44,32 @@ class Competition(object):
         compId = self.DataInterface.addNewTableEntry(newComp)
 
         resData = data["resultData"]
-        resDataDict = resData.to_dict("records")
 
-        # TODO: Write the results into the database
+        for dat in resData:
+
+            self.addNewResult(dat, compId)
+
+    def addNewResult(self, resultData, compId):
+        """Add a new Result to a competition and
+        connect it to an athlete.
+        
+        The result data format are a list of dicts. The key
+        "id" in the result data is the athlete id. This will
+        be converted to "athlete_id"
+
+        Args:
+            resultData (list(dict)): List with results
+
+        Returns:
+            resId (int): ID of the newly added result
+        """
+
+        resultData["competition_id"] = compId
+        resultData["athlete_id"] = resultData.pop("id")
+        newRes = self.ResultData(**resultData)
+        resId = self.DataInterface.addNewTableEntry(newRes)
+
+        return resId
 
     def getAllParticipants(self):
         """
