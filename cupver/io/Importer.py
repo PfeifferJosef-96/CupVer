@@ -26,28 +26,40 @@ class OnTimeImporter(object):
 
         for colName in rawCols:
 
-            convCols.append(OnTimeNames.convertToInternalFromResult)
+            convCols.append(OnTimeNames().convertToInternalFromResult(colName))
 
         df.columns = convCols
 
         return df
 
-    def importResultFile(self, path):
+    def importResultFile(self, path, returnFormat="records"):
         """Import an OnTime Result file into an
         dataframe
 
         Args:
             path (pathlib.Path): Full path to result file
-
+            returnFormat (str): --> records: dataframe.to_dict('records')
+                                --> df: dataframe
         Returns:
-            df (pd.Dataframe): Dataframe with the content of the
-                result file and converted for internal usage
+            df (pd.Dataframe / dict): Dataframe with the content of the
+                result file and converted for internal usage.
+                Format depends on "returnFormat"
+
 
         """
 
         rawDf = self.readDataframe(path)
-
         df = self.convertDataframeColumns(rawDf)
 
-        return df
+        if returnFormat == "records":
+            retVal = df.to_dict("records")
+        elif returnFormat == "df":
+
+            retVal = df
+
+        else:
+            
+            raise KeyError
+
+        return retVal
 

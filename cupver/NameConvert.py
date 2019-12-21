@@ -39,18 +39,17 @@ class OnTimeNames(object):
 
     def __init__(self):
 
-        internalToOnTimeDict = {
+        self.internalToOnTimeDict = {
             InternalNames.NAME: self.NAME,
             InternalNames.FIRST_NAME: self.FIRST_NAME,
             InternalNames.CLASS_GROUP: self.CLASS_GROUP,
             InternalNames.BIRTH_YEAR: self.BIRTH_YEAR,
             InternalNames.SEX: self.SEX,
             InternalNames.CLUB: self.CLUB,
-            InternalNames.RES_INFO: self.INFO,
-            InternalNames.ID: self.RES_INFO,
+            InternalNames.ID: self.INFO,
         }
 
-        onTimeResultToInternal = {
+        self.onTimeResultToInternal = {
             self.RES_INFO: InternalNames.ID,
             self.RES_RANK: InternalNames.RES_RANK,
         }
@@ -79,7 +78,7 @@ class OnTimeNames(object):
         """Convert Names from OnTime Result File
         """
         try:
-            convName = self.onTimeResultToInternal(name)
+            convName = self.onTimeResultToInternal[name]
 
         except KeyError as keyErr:
             convName = "N/A"
