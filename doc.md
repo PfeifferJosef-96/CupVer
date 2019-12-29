@@ -1,4 +1,28 @@
 
+## Export Formats
+
+Some of the timing applications need a certain format of import files. The formats
+are documented here:
+
+### OnTime
+The OnTime software expects a '.xls' file with macros in it.
+The excel workbook has three sheets (Starterliste, Nationen, Klassen).
+
+Formats for the "Starterliste" - sheet.
+
+Column Header | Excel-Column | Format Description  
+| ------------- | ------------| ---------------
+Startnr | A | empty or int between 1 - 9999
+Nachname | B | string up to 35 characters
+Vorname | C |  string up to 35 characters
+Geschlecht | D    | single character 'M' or 'W'
+Geburtsjahr |  E  | integer with 4 digits
+Mannschaft |  F  | string up to 50 characters
+Zusatzinfo |  G  | string up to 50 characters
+Nation |  H  | ???
+Klasse |   I | ???
+
+
 
 ## Import Formats
 

@@ -1,5 +1,7 @@
-from cupver.NameConvert import OnTimeNames
 import pandas as pd
+from openpyxl import load_workbook
+
+from cupver.NameConvert import OnTimeNames
 
 
 class OnTimeExporter(object):
@@ -24,15 +26,15 @@ class OnTimeExporter(object):
         self.dtypeColumns = [int, str, str, str, int, str, str, str, str]
 
         self.columnFormatDict = {
-            OnTimeNames.START_NO:       self.startNoColConverter,
+            OnTimeNames.START_NO: self.startNoColConverter,
             OnTimeNames.NAME: self.nameColConverter,
             OnTimeNames.FIRST_NAME: self.nameColConverter,
-            OnTimeNames.SEX:self.sexColConverter,
-            OnTimeNames.BIRTH_YEAR:self.birthYearColConverter,
-            OnTimeNames.CLUB:self.clubColConverter,
-            OnTimeNames.INFO:self.clubColConverter,
-            OnTimeNames.NATION:self.nationGroupColConverter,
-            OnTimeNames.CLASS_GROUP:self.classGroupColConverter,
+            OnTimeNames.SEX: self.sexColConverter,
+            OnTimeNames.BIRTH_YEAR: self.birthYearColConverter,
+            OnTimeNames.CLUB: self.clubColConverter,
+            OnTimeNames.INFO: self.classGroupColConverter,
+            OnTimeNames.NATION: self.nationGroupColConverter,
+            OnTimeNames.CLASS_GROUP: self.classGroupColConverter,
         }
 
     def exportDataFrameToFile(self, data, path):
@@ -51,14 +53,33 @@ class OnTimeExporter(object):
             statusCode (int): Code specifying if everything passed
                 or an error occured.
         """
-        preparedDataFrame = self.prepareDataFrame(data)
+        preparedDataFrame = self.setUpDataframe(data)
+        writer = self.prepareTemplate(path)
+        
+        preparedDataFrame.to_excel(writer,sheet_name='Starterliste', index=False, header=False, startrow=1)
 
-    def prepareDataFrame(self, data):
-        pass
+        writer.save()
+
+
+    def prepareTemplate(self, path):
+        
+        book = load_workbook('./templates/OnTime10_Anmeldung.xlsm', keep_vba=True)
+        
+        writer = pd.ExcelWriter(path, engine='openpyxl', model='a') 
+        writer.book = book
+        writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+
+        return writer
+
+
 
     def setUpDataframe(self, data):
 
-        dataFrame = pd.DataFrame(data={}, columns=self.dataFrameColumns)
+        prepData = self.prepareColumnsOfData(data)
+
+        dataFrame = pd.DataFrame.from_dict(
+            data=data, orient="index", columns=self.dataFrameColumns
+        )
 
         return dataFrame
 
@@ -69,8 +90,17 @@ class OnTimeExporter(object):
         Format.
         """
 
-        for subDat in data:
-            pass
+        for key in data.keys():
+            data[key] = {
+                OnTimeNames().convertFromInternal(subkey): value
+                for subkey, value in data[key].items()
+            }
+
+            data[key] = {
+                subkey : self.columnFormatDict[subkey](value) for subkey, value in data[key].items()
+            }
+
+        return data
 
     @staticmethod
     def startNoColConverter(x):
@@ -100,7 +130,7 @@ class OnTimeExporter(object):
     @staticmethod
     def sexColConverter(x):
 
-        maleSyn = ["M","m", "männlich", "Männlich"]
+        maleSyn = ["M", "m", "männlich", "Männlich"]
         femaleSyn = ["W", "w", "weiblich", "Weiblich"]
 
         retVal = x
@@ -122,18 +152,32 @@ class OnTimeExporter(object):
     @staticmethod
     def birthYearColConverter(x):
 
-        if type(x) is not X:
+        if type(x) is not int:
             retVal = 1900
+            
+        else:
+            retVal = x
 
+        return x
 
     @staticmethod
     def clubColConverter(x):
-        pass
+        
+        if type(x) is not str:
+            x = str(x)
+        
+        return x
 
     @staticmethod
     def classGroupColConverter(x):
-        pass
+
+        if type(x) is not str:
+            x = str(x)
+
+        x = x[:50]
+
+        return x 
 
     @staticmethod
     def nationGroupColConverter(x):
-        pass
+        return x

@@ -60,7 +60,7 @@ def test_sexColConverter(Exporter, test_input, expected):
 
     assert retVal == expected
 
-
+@pytest.mark.skip
 def test_setUpDataframe(Exporter):
 
     columns = [
