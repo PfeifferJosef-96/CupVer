@@ -1,3 +1,4 @@
+from sqlalchemy import exc, text, update
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -36,20 +37,28 @@ class DataInterface(object):
 
         self.session = None
 
-    def addNewTableEntry(self, tableRow):
+    def addNewTableEntry(self, tableRow, commitEntry=True):
+        """
+        """
 
         try:
             self.session.add(tableRow)
 
-        except Exception as exc:
+            if commitEntry:
+                self.session.commit()
+            rowId = tableRow.getId()
+
+        except exc.IntegrityError as irexc:
+            rowId = -1
+            print("Already existing entry!")
+            self.session.rollback()
+
+        except Exception as exce:
             # TODO: Split up the exception type!
             self.session.rollback()
 
             print("Error - Check Import")
             rowId = -1
-        else:
-            self.session.commit()
-            rowId = tableRow.id
 
         finally:
 
@@ -81,7 +90,7 @@ class DataInterface(object):
                 in dictionary format.
         """
 
-        queryList = self.session.query(tableClass).order_by(tableClass.id).all()
+        queryList = self.session.query(tableClass).all()
 
         dictOut = {}
         for it, row in enumerate(queryList):
@@ -97,3 +106,32 @@ class DataInterface(object):
         query = self.session.query(Athlete).filter_by(id=1).first()
 
         return query
+
+    def updateResultAssoc(self, athId, compId, resultId):
+        """Update the result field of the ResultAssociation table
+        between an existing athlete - competition mapping.
+
+        Args:
+            athId (int): Id of the athlete corresponding to resultId
+            comopId (int): Id of the competition
+            resultId (int): Id of the result in the database
+        """
+        from cupver.DB.Tables.Athlete import (
+            ResultAssociation,
+        )  # import here until correct import is possible
+
+        try:
+
+            ResultAssoc = text("resultAssociation")
+            self.session.query(ResultAssociation).filter(
+                ResultAssociation.athleteId == athId
+            ).filter(ResultAssociation.competitionNr == compId).update(
+                {"result": resultId}
+            )
+
+            self.session.commit()
+
+        except Exception as exc:
+            self.session.rollback()
+
+            raise exc

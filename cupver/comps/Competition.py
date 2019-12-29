@@ -1,5 +1,7 @@
 from cupver.DB.DB import DataInterface
 
+from cupver.DB.Tables.Athlete import ResultAssociation
+
 
 class Competition(object):
     def __init__(self, ParticipantImport, Athlete, ResultData, CompetitionData):
@@ -30,24 +32,17 @@ class Competition(object):
         status = self.DataInterface.connectToDatabase(newSession)
 
         return status
-    
+
     def getAthleteByID(self, id):
 
         pass
 
-    def addNewCompetition(self, data):
+    def addNewCompetition(self, compData):
         """
         """
 
-        cData = data["compData"]
-        newComp = self.CompetitionData(**cData)
+        newComp = self.CompetitionData(**compData)
         compId = self.DataInterface.addNewTableEntry(newComp)
-
-        resData = data["resultData"]
-
-        for dat in resData:
-
-            self.addNewResult(dat, compId)
 
     def addNewResult(self, resultData, compId):
         """Add a new Result to a competition and
@@ -64,10 +59,20 @@ class Competition(object):
             resId (int): ID of the newly added result
         """
 
-        resultData["competition_id"] = compId
-        resultData["athlete_id"] = resultData.pop("id")
+        athleteId = resultData.pop("athleteId")
+
         newRes = self.ResultData(**resultData)
-        resId = self.DataInterface.addNewTableEntry(newRes)
+
+        newAssoc = ResultAssociation(
+            athleteId=athleteId, competitionNr=compId, result=None
+        )
+
+        id = self.DataInterface.addNewTableEntry(newAssoc)
+
+        if id != -1:
+            resId = self.DataInterface.addNewTableEntry(newRes, commitEntry=True)
+
+            self.DataInterface.updateResultAssoc(athleteId, compId, resId)
 
         return resId
 

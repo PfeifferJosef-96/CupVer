@@ -8,7 +8,7 @@ class InternalNames(object):
     BIRTH_YEAR = "birthYear"
     SEX = "sex"
     CLUB = "club"
-    ID = "id"
+    ID = "athleteId"
 
     RES_RANK = "rank"
 

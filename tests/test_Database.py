@@ -2,8 +2,9 @@ import pytest
 from sqlalchemy import create_engine
 
 from cupver.DB.DB import Base, DataInterface, Session
-from cupver.DB.Tables.Athlete import Athlete
+from cupver.DB.Tables.Athlete import Athlete, ResultAssociation
 from cupver.DB.Tables.Result import Result
+from cupver.DB.Tables.CompetitionData import CompetitionData
 
 
 @pytest.fixture
@@ -23,19 +24,31 @@ def DataBaseInterface():
 @pytest.fixture
 def session(engine):
     Session.configure(bind=engine)
-    session = Session()
+    newSession = Session()
 
     Base.metadata.create_all(engine)
 
-    return session
+    return newSession
 
 
 @pytest.mark.parametrize(
     "test_input,expection",
     [
         ("invalidRow", -1),
-        (Athlete(**dict(name="name", firstName="firstname", classGroup="classGroup", birthYear="birthYear", sex="sex", club="club")),
-      0)],
+        (
+            Athlete(
+                **dict(
+                    name="name",
+                    firstName="firstname",
+                    classGroup="classGroup",
+                    birthYear="birthYear",
+                    sex="sex",
+                    club="club",
+                )
+            ),
+            1,
+        ),
+    ],
 )
 def test_addNewTableEntry(DataBaseInterface, session, test_input, expection):
 
@@ -72,4 +85,17 @@ def test_queryWholeTable(DataBaseInterface, session):
     DataBaseInterface.connectToDatabase(session)
 
     DataBaseInterface.queryWholeTable(Athlete)
+
+
+@pytest.mark.parametrize(
+    "dbInterface ,athId, compId, resultId",
+    [
+        (DataBaseInterface, 1, 1, 1),  # valid
+        (DataBaseInterface, 1, 1000, 1),  # invalid
+        (DataBaseInterface, 1000, 1, 1),  # invalid
+        (DataBaseInterface, 1, 1, 1000),  # invalid
+    ],
+)
+def test_updateResultAssoc(dbInterface, athId, compId, resultId):
+    pass
 

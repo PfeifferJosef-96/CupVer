@@ -8,11 +8,12 @@ class Result(Base):
 
     __tablename__ = "results"
 
-    id = Column(Integer, primary_key=True)
+    resultId = Column(Integer, primary_key=True)
     rank = Column(Integer)
-    competition_id = Column(Integer, ForeignKey("competitions.id"))
-    athlete_id = Column(Integer, ForeignKey("athletes.id"))
+    runTime = Column(String)
+    points = Column(Integer)
 
-    athlete = relationship("Athlete", back_populates="results")
-    #competition = relationship("CompetitionData", back_populates=)
+    def getId(self):
+
+        return self.resultId
 
