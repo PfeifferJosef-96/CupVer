@@ -76,7 +76,7 @@ class ImportParticipants(object):
         for dat in classDf.itertuples():
             
             # TODO: The named tuple is dangerous because of changing column names!!!
-            lowLim = dat.jüngstJahrg <= birthYear >= dat.ältestJahrg
+            lowLim = dat.jüngstJahrg >= birthYear >= dat.ältestJahrg
             sexAtt = dat.Geschlecht == sex
 
             if lowLim and sexAtt:
